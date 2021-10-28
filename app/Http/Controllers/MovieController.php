@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class MovieController extends Controller
 {
@@ -13,17 +16,27 @@ class MovieController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $titles = Movie::where('user_id', Auth()->id())->paginate(5);
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $url = "http://www.omdbapi.com/";
+
+        $feed = [];
+
+        foreach ($titles as $title)
+        {
+            $feed[] = Http::get($url,
+                [
+                    "apikey" => "209329ef",
+                    "i" => "$title->movie_id",
+                ])->json();
+        }
+
+        //dd($data);
+
+        return view('movies.index', [
+            "feed" => $feed,
+            "titles" => $titles
+        ]);
     }
 
     /**
@@ -34,41 +47,14 @@ class MovieController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $movie = new Movie();
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+        $movie->user_id = Auth()->id();
+        $movie->movie_id = $request->movie_id;
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        $movie->save();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        return redirect()->back()->with('success', 'Added to favorites.');
     }
 
     /**
@@ -79,6 +65,8 @@ class MovieController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Movie::where('movie_id', $id)->where('user_id', Auth()->id())->delete();
+
+        return redirect()->back()->with('success', 'Title deleted from favorites');
     }
 }

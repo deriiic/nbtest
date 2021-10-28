@@ -31,6 +31,10 @@ class OmdbController extends Controller
                 "page" => $page
             ])->json();
 
+        if(!isset($feed['Search'])) {
+            return redirect()->route('home')->with('error', 'Could not find any title with that query.');
+        }
+
         $shows = collect($feed['Search']);
 
         // Get max pages
@@ -51,38 +55,17 @@ class OmdbController extends Controller
         }
 
         // Get all favorite data
-        $favorites = Movie::where('user_id', Auth::id())->get();
+        $movies = Movie::where('user_id', Auth::id())->get();
 
-        //dd($shows);
+        // dd($movies);
 
         return view('omdb.index',[
             'shows' => $shows,
             'nextPage' => $nextPage,
             'page' => $page,
             'previousPage' => $previousPage,
-            'favorites' => $favorites
+            'movies' => $movies
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -104,40 +87,9 @@ class OmdbController extends Controller
 
         //dd($data);
 
-        return view('omdb.show',[ 'data' => $data]);
-    }
+        // Get all favorite data
+        $movies = Movie::where('user_id', Auth::id())->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return view('omdb.show',[ 'data' => $data, 'movies' => $movies]);
     }
 }

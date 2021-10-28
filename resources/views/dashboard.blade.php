@@ -11,6 +11,11 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     You're logged in!
                 </div>
+                <div class="p-6 bg-white">
+                    <a href="{{ route('movies.index') }}" class="bg-yellow-500 p-2 rounded-full hover:bg-yellow-600">
+                        Check your favorites
+                    </a>
+                </div>
             </div>
         </div>
     </div>
