@@ -31,6 +31,7 @@ class MovieController extends Controller
                 ])->json();
         }
 
+        // For testing response
         //dd($data);
 
         return view('movies.index', [

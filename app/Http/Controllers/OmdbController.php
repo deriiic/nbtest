@@ -21,6 +21,7 @@ class OmdbController extends Controller
         $url = "http://www.omdbapi.com/";
 
         // Check for page number
+        // Make 1 as default value
         $page = $request->page ?? 1;
 
         $feed = Http::get($url,
@@ -31,12 +32,17 @@ class OmdbController extends Controller
                 "page" => $page
             ])->json();
 
+        // Check if query returns any feeds
         if(!isset($feed['Search'])) {
-            return redirect()->route('home')->with('error', 'Could not find any title with that query.');
+            return redirect()
+                ->route('home')
+                ->with('error', 'Could not find any title with that query.');
         }
 
+        // Collect feeds from query
         $shows = collect($feed['Search']);
 
+        // Make simple custom pagination
         // Get max pages
         $maxPages = (int) ceil($feed['totalResults'] / 10);
 
@@ -53,10 +59,12 @@ class OmdbController extends Controller
         } else {
             $previousPage = null;
         }
+        // ---- End pagination ----
 
-        // Get all favorite data
+        // Get all movies stored as favorites
         $movies = Movie::where('user_id', Auth::id())->get();
 
+        // For testing response
         // dd($movies);
 
         return view('omdb.index',[
@@ -85,6 +93,7 @@ class OmdbController extends Controller
                 "plot" => "short",
             ])->json();
 
+        // For testing response
         //dd($data);
 
         // Get all favorite data
