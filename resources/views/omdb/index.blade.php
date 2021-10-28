@@ -6,8 +6,8 @@
         <div class="w-full my-10">
             <div class="grid grid-cols-4 gap-4 mt-5">
 
-                @if(isset($data))
-                    @foreach($data['Search'] as $details)
+                @if(isset($shows))
+                    @foreach($shows as $details)
                         <div class="text-center mb-5 bg-gray-200 p-3 rounded-lg shadow-sm">
                             <a href="{{ route('omdb.show', $details['imdbID']) }}">
                                 <img src="{{ $details['Poster'] }}" alt="Poster" class="w-1/2 mx-auto p-0 rounded-3xl transition duration-500 ease-in-out hover:bg-red-600 transform hover:-translate-y-1 hover:scale-110">
@@ -21,9 +21,19 @@
                                 År: {{ $details["Year"] }}
                             </p>
 
-                            <button class="bg-yellow-700 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mt-2">
-                                <i class="fas fa-star"></i> Favorit
-                            </button>
+                            @if(!$favorites->contains('movie_id', $details['imdbID']))
+                                <form action="{{ route('movies.favorite', $details["imdbID"]) }}">
+                                    <button type="submit" class="bg-yellow-700 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mt-2">
+                                        <i class="fas fa-star"></i> Favorit
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('movies.unfavorite', $details["imdbID"]) }}">
+                                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-700 text-black font-bold py-2 px-4 rounded-full mt-2">
+                                        <i class="fas fa-star"></i> Favorit
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     @endforeach
                 @endif

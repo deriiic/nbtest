@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class OmdbController extends Controller
 {
-    public function __construct()
-    {
-        $url = "http://www.omdbapi.com/?apikey=209329ef&";
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -20,20 +18,23 @@ class OmdbController extends Controller
      */
     public function index(Request $request)
     {
-        $client = new Client();
-        $title = $request->title;
-        $type = $request->type;
+        $url = "http://www.omdbapi.com/";
 
         // Check for page number
         $page = $request->page ?? 1;
 
-        $response = $client->request("GET", "http://www.omdbapi.com/",
-            ["query" => ["apikey" => "209329ef", "s" => $title, "type" => $type, "page" => $page]]);
+        $feed = Http::get($url,
+            [
+                "apikey" => "209329ef",
+                "s" => $request->title,
+                "type" => $request->type,
+                "page" => $page
+            ])->json();
 
-        $data = json_decode($response->getBody(), true);
+        $shows = collect($feed['Search']);
 
         // Get max pages
-        $maxPages = (int) ceil($data['totalResults'] / 10);
+        $maxPages = (int) ceil($feed['totalResults'] / 10);
 
         // Get next page
         if ($page < $maxPages) {
@@ -49,10 +50,18 @@ class OmdbController extends Controller
             $previousPage = null;
         }
 
+        // Get all favorite data
+        $favorites = Movie::where('user_id', Auth::id())->get();
 
-        //dd($data);
+        //dd($shows);
 
-        return view('omdb.index')->with(compact('data', 'maxPages', 'page', 'nextPage', 'previousPage'));
+        return view('omdb.index',[
+            'shows' => $shows,
+            'nextPage' => $nextPage,
+            'page' => $page,
+            'previousPage' => $previousPage,
+            'favorites' => $favorites
+        ]);
     }
 
     /**
@@ -84,16 +93,18 @@ class OmdbController extends Controller
      */
     public function show($id)
     {
-        $client = new Client();
+        $url = "http://www.omdbapi.com/";
 
-        $response = $client->request("GET", "http://www.omdbapi.com/",
-            ["query" => ["apikey" => "209329ef", "i" => $id, "plot" => "short"]]);
-
-        $data = json_decode($response->getBody(), true);
+        $data = Http::get($url,
+            [
+                "apikey" => "209329ef",
+                "i" => $id,
+                "plot" => "short",
+            ])->json();
 
         //dd($data);
 
-        return view('omdb.show')->with('data', $data);
+        return view('omdb.show',[ 'data' => $data]);
     }
 
     /**
