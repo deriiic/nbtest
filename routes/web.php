@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OmdbController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,5 +21,8 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+Route::get('/search', [OmdbController::class, 'index'])->name('omdb.search');
+Route::get('/titles/{id}', [OmdbController::class, 'show'])->name('omdb.show');
 
 require __DIR__.'/auth.php';
