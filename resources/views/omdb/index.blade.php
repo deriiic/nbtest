@@ -17,8 +17,8 @@
                     </div>
                 </a>
             @endif
-            <div class="grid grid-cols-4 gap-4 mt-5">
 
+            <div class="grid md:grid-cols-4 md:gap-4 sm:grid-cols-1 sm:gap-1 mt-5">
                 @if(isset($shows))
                     @foreach($shows as $data)
                         <div class="text-center mb-5 bg-gray-200 p-3 rounded-lg shadow-sm">
